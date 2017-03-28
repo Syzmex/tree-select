@@ -237,4 +237,72 @@ describe('TreeSelect', () => {
     treeWrapper.find('.rc-tree-select-tree-checkbox').simulate('click');
     expect(wrapper.state().value).toEqual([{ value: '0', label: 'label0' }]);
   });
+
+  it('expands tree nodes by treeDefaultExpandedKeys', () => {
+    const wrapper = mount(
+      <TreeSelect treeDefaultExpandedKeys={['1']}>
+        <TreeNode key="0" value="0" title="0 label"/>
+        <TreeNode key="1" value="1" title="1 label">
+          <TreeNode key="10" value="10" title="10 label"/>
+          <TreeNode key="11" value="11" title="11 label"/>
+        </TreeNode>
+      </TreeSelect>
+    );
+    const treeWrapper = mount(wrapper.find('Trigger').node.getComponent());
+    const node = treeWrapper.find('.rc-tree-select-tree-node-content-wrapper').at(1);
+    expect(node.hasClass('rc-tree-select-tree-node-content-wrapper-open')).toBe(true);
+  });
+
+  describe('propTypes', () => {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    afterEach(() => {
+      spy.mockReset();
+    });
+
+    afterAll(() => {
+      spy.mockRestore();
+    });
+
+    it('warns on invalid value when labelInValue', () => {
+      mount(
+        <TreeSelect
+          labelInValue
+          value="foo"
+        />
+      );
+      expect(spy.mock.calls[0][0]).toMatch(
+        'Invalid prop `value` supplied to `Select`, when `labelInValue` ' +
+        'is `true`, `value` should in shape of `{ value: string, label?: string }`'
+      );
+    });
+
+    it('warns on invalid value when treeCheckable and treeCheckStrictly', () => {
+      mount(
+        <TreeSelect
+          treeCheckable
+          treeCheckStrictly
+          value="foo"
+        />
+      );
+      expect(spy.mock.calls[0][0]).toMatch(
+        'Invalid prop `value` supplied to `Select`, when `treeCheckable` ' +
+        'and `treeCheckStrictly` are `true`, `value` should in shape of ' +
+        '`{ value: string, label?: string }`'
+      );
+    });
+
+    it('warns on invalid value when multiple', () => {
+      mount(
+        <TreeSelect
+          multiple
+          value=""
+        />
+      );
+      expect(spy.mock.calls[0][0]).toMatch(
+        'Invalid prop `value` of type `string` supplied to `Select`, ' +
+        'expected `array` when `multiple` is `true`'
+      );
+    });
+  });
 });
